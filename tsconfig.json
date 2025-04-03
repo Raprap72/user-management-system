@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    /* Paths and Module Resolution */
+    "baseUrl": "./",
+    "paths": {
+      "@app/*": ["src/app/*"]
+    },
+    "moduleResolution": "node",
+
+    /* Output Directories */
+    "rootDir": "src",
+    "outDir": "dist",
+
+    /* Language and Target */
+    "target": "es2016",
+    "module": "commonjs",
+
+    /* Interop and Imports */
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+
+    /* Type Checking */
+    "strict": true,
+    "strictPropertyInitialization": false,
+
+    /* Performance Optimizations */
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "exclude": ["node_modules", "dist"]
+}
