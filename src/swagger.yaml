@@ -1,0 +1,93 @@
+openapi: 3.0.0
+info:
+  title: User Management API
+  version: 1.0.0
+  description: API for managing user accounts and authentication.
+servers:
+  - url: http://localhost:4000 # Adjust to your server URL
+paths:
+  /accounts/authenticate:
+    post:
+      summary: Authenticate user and generate JWT token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Authentication successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jwtToken:
+                    type: string
+                  refreshToken:
+                    type: string
+                  # Include other user details as needed
+        '400':
+          description: Bad request (e.g., missing fields).
+        '401':
+          description: Unauthorized (invalid credentials).
+  /accounts/register:
+    post:
+      summary: Register a new user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                confirmPassword:
+                  type: string
+                acceptTerms:
+                  type: boolean
+      responses:
+        '200':
+          description: Registration successful.
+        '400':
+          description: Bad request (e.g., validation errors).
+  /accounts/verify-email:
+    post:
+      summary: Verify user's email.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+      responses:
+        '200':
+          description: Email verification successful.
+        '400':
+          description: Bad request (e.g., invalid token).
+  # Add other endpoints (e.g., forgot-password, reset-password, get-user, etc.)
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
