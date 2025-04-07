@@ -1,29 +1,58 @@
 {
-  "dependencies": {
-    "@angular/core": "^19.2.5",
-    "@angular/router": "^19.2.5",
-    "express": "^5.1.0",
-    "rxjs": "^7.8.2"
-  },
   "name": "user-management-system",
   "version": "1.0.0",
-  "description": "",
+  "description": "Full-stack user management system with Angular frontend and Node.js/MySQL backend",
   "main": "index.js",
-  "devDependencies": {
-    "typescript": "^5.8.2"
-  },
   "scripts": {
+    "start:backend": "node server/server.js",
+    "start:backend:dev": "nodemon server/server.js",
+    "start:frontend": "ng serve --open --project user-management-system",
+    "build:frontend": "ng build --project user-management-system",
+    "start": "concurrently \"npm run start:backend:dev\" \"npm run start:frontend\"",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:backend": "echo 'Backend build not needed for this setup'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Raprap72/user-management-system.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "angular",
+    "node.js",
+    "mysql",
+    "user-management",
+    "full-stack"
+  ],
+  "author": "Raprap72",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/Raprap72/user-management-system/issues"
   },
-  "homepage": "https://github.com/Raprap72/user-management-system#readme"
+  "homepage": "https://github.com/Raprap72/user-management-system#readme",
+  "dependencies": {
+    "@angular/core": "^19.2.5",
+    "@angular/router": "^19.2.5",
+    "rxjs": "^7.8.2",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "express-jwt": "^6.0.0",
+    "express": "^4.17.1",
+    "joi": "^17.2.1",
+    "jsonwebtoken": "^8.5.1",
+    "mysql2": "^2.1.0",
+    "nodemailer": "^6.4.11",
+    "rootpath": "^0.1.2",
+    "sequelize": "^6.3.4",
+    "swagger-ui-express": "^4.1.4",
+    "yamljs": "^0.3.0",
+    "concurrently": "^8.2.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2",
+    "nodemon": "^2.0.3",
+    "@angular/cli": "^17.2.3"
+  }
 }
