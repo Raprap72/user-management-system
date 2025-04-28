@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Raprap72/user-management-system/issues"
   },
-  "homepage": "https://github.com/Raprap72/user-management-system#readme"
+  "homepage": "https://github.com/Raprap72/user-management-system#readme",
+  "dependencies": {
+    "user-management-system": "file:"
+  }
 }
