@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/Raprap72/user-management-system#readme",
   "dependencies": {
+    "bootstrap": "^5.3.5",
     "user-management-system": "file:"
   }
 }
