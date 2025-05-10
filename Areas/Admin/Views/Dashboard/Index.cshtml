@@ -1,0 +1,220 @@
+@using RoyalStayHotel.Models
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Welcome, @Model.AdminName!</h1>
+        <a href="@Url.Action("Create", "Booking", new { area = "Admin" })" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            <i class="fas fa-plus fa-sm text-white-50"></i> New Booking
+        </a>
+    </div>
+
+    <!-- Stats Cards Row -->
+    <div class="row">
+        <!-- Total Bookings Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Bookings</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalBookings</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Revenue Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Revenue</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">₱@Model.TotalRevenue.ToString("N2")</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Rooms Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Available Rooms</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.AvailableRooms</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-bed fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Maintenance Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pending Maintenance</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.PendingMaintenance</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tools fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Recent Bookings -->
+        <div class="col-xl-6 col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Bookings</h6>
+                    <a href="@Url.Action("Index", "Booking", new { area = "Admin" })" class="btn btn-sm btn-primary">
+                        View All
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentBookings != null && Model.RecentBookings.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Booking Reference</th>
+                                        <th>Guest</th>
+                                        <th>Room</th>
+                                        <th>Check In</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var booking in Model.RecentBookings)
+                                    {
+                                        <tr>
+                                            <td>@booking.BookingReference</td>
+                                            <td>@booking.User?.FullName</td>
+                                            <td>@booking.Room?.RoomNumber</td>
+                                            <td>@booking.CheckInDate.ToString("MMM dd, yyyy")</td>
+                                            <td>
+                                                <span class="badge @(booking.Status == BookingStatus.Confirmed ? "bg-success" : 
+                                                               booking.Status == BookingStatus.Pending ? "bg-warning text-dark" : 
+                                                               booking.Status == BookingStatus.Cancelled ? "bg-danger" : 
+                                                               "bg-secondary")">
+                                                    @booking.Status
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-day fa-3x text-gray-300 mb-3"></i>
+                            <p class="mb-0 text-gray-600">No recent bookings found.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Payments -->
+        <div class="col-xl-6 col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-success">Recent Payments</h6>
+                    <a href="@Url.Action("Index", "Payment", new { area = "Admin" })" class="btn btn-sm btn-success">
+                        View All
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentPayments != null && Model.RecentPayments.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Booking Reference</th>
+                                        <th>Guest</th>
+                                        <th>Room</th>
+                                        <th>Check In</th>
+                                        <th>Total Price</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var payment in Model.RecentPayments)
+                                    {
+                                        <tr>
+                                            <td>@payment.Booking?.BookingReference</td>
+                                            <td>@payment.Booking?.User?.FullName</td>
+                                            <td>@payment.Booking?.Room?.RoomNumber</td>
+                                            <td>@payment.Booking?.CheckInDate.ToString("MMM dd, yyyy")</td>
+                                            <td>@payment.Booking?.TotalPrice.ToString("C")</td>
+                                            <td>
+                                                <span class="badge @(payment.Status == PaymentStatus.Completed ? "bg-success" : 
+                                                               payment.Status == PaymentStatus.Pending ? "bg-warning text-dark" : 
+                                                               payment.Status == PaymentStatus.Failed ? "bg-danger" : 
+                                                               "bg-secondary")">
+                                                    @payment.Status
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-money-bill-wave fa-3x text-gray-300 mb-3"></i>
+                            <p class="mb-0 text-gray-600">No recent payments found.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('.table').DataTable({
+                "pageLength": 5,
+                "lengthChange": false,
+                "searching": false,
+                "ordering": true,
+                "info": false,
+                "autoWidth": false,
+                "responsive": true
+            });
+        });
+    </script>
+} 

@@ -1,0 +1,36 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="bg-light rounded h-100 p-4">
+                <h3 class="mb-4">@ViewBag.Message</h3>
+                <p>You have successfully logged in to the Royal Stay Hotel Admin Panel.</p>
+                
+                <div class="mt-4">
+                    <h5>Quick Links</h5>
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-4">
+                            <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="btn btn-primary w-100">
+                                <i class="bi bi-speedometer2 me-2"></i>Main Dashboard
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a asp-area="Admin" asp-controller="Room" asp-action="Index" class="btn btn-info w-100">
+                                <i class="bi bi-building me-2"></i>Manage Rooms
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a asp-area="Admin" asp-controller="Booking" asp-action="Index" class="btn btn-success w-100">
+                                <i class="bi bi-calendar-check me-2"></i>View Bookings
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 
