@@ -1,2 +1,1 @@
-# user-management-system
-nag install ko's angular/cli ambot nano wla ni gawas sa repo, cge lang
+# Node.js + MySQL - Boilerplate API with Email Sign Up, Verification, Authentication & Forgot Password
