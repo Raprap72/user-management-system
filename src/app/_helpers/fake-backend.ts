@@ -153,3 +153,26 @@ export class FakeBackendInterceptor implements HttpInterceptor {
 
             return ok();
         }
+
+        function forgotPassword() {
+            const { email } = body;
+            const account = accounts.find(x => x.email === email);
+
+            if (!account) return ok();
+
+            account.resetToken = new Date().getTime().toString();
+            account.resetTokenExpires = new Date(Date.now() + 24*60*60*1000).toISOString();
+            localStorage.setItem(accountsKey, JSON.stringify(accounts));
+
+            setTimeout(() => {
+                const resetUrl = `${location.origin}/account/reset-password?token=${account.resetToken}`;
+                alertService.info(`
+                    <h4>Reset Password Email</h4>
+                    <p>Please click the below link to reset your password, the link will be valid only for 1 day:</p>
+                    <p><a href="${resetUrl}">${resetUrl}</a></p>
+                    <div><strong>NOTE:</strong> The fake backend displayed this "email" so you can test without an API. A real backend would send a real email.</div>
+                    `, { autoClose: false });
+            }, 1000);
+
+            return ok();
+        }
