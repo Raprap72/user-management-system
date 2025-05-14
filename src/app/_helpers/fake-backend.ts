@@ -54,7 +54,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
 
         function authenticate() {
             const { email, password } = body;
-            const account = accounts.find(x => x.email === email && x.password === password);
+            const account = accounts.find((x: Account & { password: string }) => x.email === email && x.password === password);
 
             if (!account) return error('Email or password is incorrect');
 
@@ -69,11 +69,11 @@ export class FakeBackendInterceptor implements HttpInterceptor {
 
             if (!refreshToken) return unauthorized();
 
-            const account = accounts.find(x => x.refreshToken.includes(refreshToken));
+            const account = accounts.find((x: Account & { refreshTokens: string[] }) => x.refreshTokens.includes(refreshToken));
 
             if (!account) return unauthorized();
 
-            account.refreshToken = account.refreshTokens.filter(x => x !== refreshToken);
+            account.refreshTokens = account.refreshTokens.filter(x => x !== refreshToken);
             account.refreshTokens.push(generateRefreshToken());
             localStorage.setItem(accountsKey, JSON.stringify(accounts));
 
@@ -87,7 +87,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             if (!isAuthenticated()) return unauthorized();
 
             const refreshToken = getRefreshToken();
-            const account = accounts.find(x => x.refreshTokens.includes(refreshToken));
+            const account = accounts.find((x: Account & { refreshTokens: string[] }) => x.refreshTokens.includes(refreshToken));
 
             account.refreshTokens = account.refreshTokens.filter(x => x !== refreshToken);
             localStorage.setItem(accountsKey, JSON.stringify(accounts));
@@ -98,7 +98,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         function register(): Observable<HttpEvent<any>> {
             const account = body;
 
-            if (accounts.find(x => x.email === account.email)) {
+            if (accounts.find((x: Account) => x.email === account.email)) {
                 // display email already registered "email" in alert
                 setTimeout(() => {
                     alertService.info(`
@@ -144,7 +144,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
 
         function verifyEmail() {
             const { token } = body;
-            const account = accounts.find(x => !!x.verificationToken && x.verificationToken === token);
+            const account = accounts.find((x: Account & { verificationToken?: string }) => !!x.verificationToken && x.verificationToken === token);
 
             if (!account) return error('Invalid verification');
 
@@ -156,7 +156,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
 
         function forgotPassword() {
             const { email } = body;
-            const account = accounts.find(x => x.email === email);
+            const account = accounts.find((x: Account) => x.email === email);
 
             if (!account) return ok();
 
@@ -179,9 +179,9 @@ export class FakeBackendInterceptor implements HttpInterceptor {
 
         function validateResetToken() {
             const { token } = body;
-            const account = accounts.find(x =>
+            const account = accounts.find((x: Account & { resetToken?: string; resetTokenExpires?: string }) =>
                 !!x.resetToken && x.resetToken === token &&
-                new Date() < new Date(x.resetTokenExpires)
+                new Date() < new Date(x.resetTokenExpires!)
             );
 
             if (!account) return error('Invalid or expired token');
@@ -191,9 +191,9 @@ export class FakeBackendInterceptor implements HttpInterceptor {
 
         function resetPassword() {
             const { token, password } = body;
-            const account = accounts.find(x =>
+            const account = accounts.find((x: Account & { resetToken?: string; resetTokenExpires?: string }) =>
                 !!x.resetToken && x.resetToken === token &&
-                new Date() < new Date(x.resetTokenExpires)
+                new Date() < new Date(x.resetTokenExpires!)
             );
 
             if (!account) return error('Invalid or expired token');
@@ -216,9 +216,9 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         function getAccountById() {
             if (!isAuthenticated()) return unauthorized();
 
-            let account = accounts.find(x => x.id === idFromUrl());
+            let account = accounts.find((x: Account & { id: number }) => x.id === idFromUrl());
 
-            if (account.id !== currentAccount().id && !isAuthorized(Role.Admin)) {
+            if (account.id !== currentAccount()?.id && !isAuthorized(Role.Admin)) {
                 return unauthorized();
             };
 
@@ -229,7 +229,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             if (!isAuthorized(Role.Admin)) return unauthorized();
         
             const account = body;
-            if (accounts.find(x => x.email === account.email)) {
+            if (accounts.find((x: Account) => x.email === account.email)) {
                 return error(`Email ${account.email} is already registered`);
             }
         
@@ -249,7 +249,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             if (!isAuthenticated()) return unauthorized();
         
             let params = body;
-            let account = accounts.find(x => x.id === idFromUrl());
+            let account = accounts.find((x: Account & { id: number }) => x.id === idFromUrl());
         
             // user accounts can update own profile and admin accounts can update all profiles
             if (account.id !== currentAccount().id && !isAuthorized(Role.Admin)) {
@@ -273,7 +273,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         function deleteAccount() {
             if (!isAuthenticated()) return unauthorized();
         
-            let account = accounts.find(x => x.id === idFromUrl());
+            let account = accounts.find((x: Account & { id: number }) => x.id === idFromUrl());
         
             // user accounts can delete own account and admin accounts can delete any account
             if (account.id !== currentAccount().id && !isAuthorized(Role.Admin)) {
@@ -281,7 +281,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             }
         
             // delete account then save
-            accounts = accounts.filter(x => x.id !== idFromUrl());
+            accounts = accounts.filter((x: Account & { id: number }) => x.id !== idFromUrl());
             localStorage.setItem(accountsKey, JSON.stringify(accounts));
             return ok();
         }
