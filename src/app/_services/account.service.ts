@@ -1,131 +1,132 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map, finalize } from 'rxjs/operators';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { map, catchError, finalize } from 'rxjs/operators';
 
 import { environment } from '../../environments/environment';
 import { Account } from '../_models';
 
 const baseUrl = `${environment.apiUrl}/accounts`;
 
-interface RegisterParams extends Omit<Account, 'id'> {
-    password: string;
-}
-
 @Injectable({ providedIn: 'root' })
 export class AccountService {
-    private readonly accountSubject: BehaviorSubject<Account | null>;
-    public account: Observable<Account | null>;
+  private accountSubject: BehaviorSubject<Account | null>;
+  public account: Observable<Account | null>;
 
-    constructor(
-        private readonly router: Router,
-        private readonly http: HttpClient
-    ) {
-        this.accountSubject = new BehaviorSubject<Account | null>(null);
-        this.account = this.accountSubject.asObservable();
-    }
+  constructor(private router: Router, private http: HttpClient) {
+    this.accountSubject = new BehaviorSubject<Account | null>(null);
+    this.account = this.accountSubject.asObservable(); 
+  }
+  
+  public get accountValue(): Account | null {
+    return this.accountSubject.value;
+  }
+  
+  login(email: string, password: string) {
+    return this.http.post<any>(`${baseUrl}/authenticate`, { email, password }, { withCredentials: true })
+      .pipe(
+        map(account => {
+          // Store user details and jwt token in local storage
+          this.accountSubject.next(account);
+          this.startRefreshTokenTimer();
+          return account;
+        }),
+        catchError(error => {
+          console.error('Login error:', error);
+          return throwError(() => error);
+        })
+      );
+  }
 
-    public get accountValue(): Account | null {
-        return this.accountSubject.value;
-    }
+  logout() {
+    this.http.post<any>(`${baseUrl}/revoke-token`, {}, { withCredentials: true }).subscribe();
+    this.stopRefreshTokenTimer();
+    this.accountSubject.next(null);
+    this.router.navigate(['/account/login']);
+  }
 
-    login(email: string, password: string) {
-        return this.http.post<any>(`${baseUrl}/authenticate`, { email, password }, { withCredentials: true })
-            .pipe(map(account => {
-                this.accountSubject.next(account);
-                this.startRefreshTokenTimer();
-                return account;
-            }));
-    }
+  refreshToken() {
+    return this.http.post<any>(`${baseUrl}/refresh-token`, {}, { withCredentials: true })
+      .pipe(
+        map(account => {
+          this.accountSubject.next(account);
+          this.startRefreshTokenTimer();
+          return account;
+        }),
+        catchError(error => {
+          // If refresh token fails, log the user out
+          this.logout();
+          return throwError(() => error);
+        })
+      );
+  }
 
-    logout() {
-        this.http.post<any>(`${baseUrl}/revoke-token`, {}, { withCredentials: true })
-            .subscribe();
-        this.stopRefreshTokenTimer();
-        this.accountSubject.next(null);
-        this.router.navigate(['/account/login']);
-    }
-    
-    refreshToken() {
-        return this.http.post<any>(`${baseUrl}/refresh-token`, {}, { withCredentials: true })
-            .pipe(map(account => {
-                this.accountSubject.next(account);
-                this.startRefreshTokenTimer();
-                return account;
-            }));
-    }
-    
-    register(params: RegisterParams) {
-        return this.http.post(`${baseUrl}/register`, params);
-    }
-    
-    verifyEmail(token: string) {
-        return this.http.post(`${baseUrl}/verify-email`, { token });
-    }
-    
-    forgotPassword(email: string) {
-        return this.http.post(`${baseUrl}/forgot-password`, { email });
-    }
-    
-    validateResetToken(token: string) {
-        return this.http.post(`${baseUrl}/validate-reset-token`, { token });
-    }
-    
-    resetPassword(token: string, password: string, confirmPassword: string) {
-        return this.http.post(`${baseUrl}/reset-password`, { token, password, confirmPassword });
-    }
-    
-    getAll() {
-        return this.http.get<Account[]>(baseUrl);
-    }
-    
-    getById(id: string) {
-        return this.http.get<Account>(`${baseUrl}/${id}`);
-    }
-    
-    create(params) {
-        return this.http.post(baseUrl, params);
-    }
-    
-    update(id, params) {
-        return this.http.put(`${baseUrl}/${id}`, params)
-            .pipe(map((account: any) => {
-                // update the current account if it was updated
-                if (this.accountValue && account.id === this.accountValue.id) {
-                    // publish updated account to subscribers
-                    account = { ...this.accountValue, ...account };
-                    this.accountSubject.next(account);
-                }
-                return account;
-            }));
-    }
-    
-    delete(id: string) {
-        return this.http.delete(`${baseUrl}/${id}`)
-            .pipe(finalize(() => {
-                // auto logout if the logged-in account was deleted
-                if (this.accountValue && id === this.accountValue.id) {
-                    this.logout();
-                }
-            }));
-    }
-    
-    private refreshTokenTimeout;
+  register(account: Account) {
+    return this.http.post(`${baseUrl}/register`, account);
+  }
 
-    private startRefreshTokenTimer() {
-        if (!this.accountValue?.jwtToken) return;
-        
-        // parse json object from base64 encoded jwt token
-        const jwtToken = JSON.parse(atob(this.accountValue.jwtToken.split('.')[1]));
+  verifyEmail(token: string) {
+    return this.http.post(`${baseUrl}/verify-email`, { token });
+  }
 
-        // set a timeout to refresh the token a minute before it expires
-        const expires = new Date(jwtToken.exp * 1000);
-        const timeout = expires.getTime() - Date.now() - (60 * 1000);
-        this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(), timeout);
-    }
+  forgotPassword(email: string) {
+    return this.http.post(`${baseUrl}/forgot-password`, { email });
+  }
 
-    private stopRefreshTokenTimer() {
-        clearTimeout(this.refreshTokenTimeout);
-    }
+  validateResetToken(token: string) {
+    return this.http.post(`${baseUrl}/validate-reset-token`, { token });
+  }
+
+  resetPassword(token: string, password: string, confirmPassword: string) {
+    return this.http.post(`${baseUrl}/reset-password`, { token, password, confirmPassword });
+  }
+
+  getAll() {
+    return this.http.get<Account[]>(baseUrl);
+  }
+
+  getById(id: string) {
+    return this.http.get<Account>(`${baseUrl}/${id}`);
+  }
+
+  create(params: any) {
+    return this.http.post(baseUrl, params);
+  }
+
+  update(id:string, params:object) {
+    return this.http.put(`${baseUrl}/${id}`, params)
+      .pipe(map((account: any) => {
+        if (account.id === this.accountValue?.id) {
+          account = { ...this.accountValue, ...account };
+          this.accountSubject.next(account);
+        }
+        return account;
+      }));
+  }
+
+  delete(id: string) {
+    return this.http.delete(`${baseUrl}/${id}`)
+      .pipe(finalize(() => {
+        if (id === String(this.accountValue?.id)) {
+          this.logout();
+        }
+      }));
+  }
+
+  private refreshTokenTimeout: any;
+
+  private startRefreshTokenTimer() {
+    const jwtToken = this.accountValue?.jwtToken
+    ? JSON.parse(atob(this.accountValue.jwtToken.split('.')[1]))
+    : null;
+
+    const expires = new Date(jwtToken.exp * 1000);
+    const timeout = expires.getTime() - Date.now() - (60 * 1000);
+    this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(), timeout);
+  }
+
+  private stopRefreshTokenTimer() {
+    clearTimeout(this.refreshTokenTimeout);
+  }
 }
