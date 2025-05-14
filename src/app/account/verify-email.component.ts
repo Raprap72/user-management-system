@@ -15,18 +15,18 @@ export class VerifyEmailComponent implements OnInit {
   emailStatus = EmailStatus.Verifying;
 
   constructor(
-    private readonly route: ActivatedRoute,
-    private readonly router: Router,
-    private readonly accountService: AccountService,
-    private readonly alertService: AlertService
+    private route: ActivatedRoute,
+    private router: Router,
+    private accountService: AccountService,
+    private alertService: AlertService
   ) { }
 
   ngOnInit() {
     const token = this.route.snapshot.queryParams['token'];
-    
+
     // remove token from url to prevent http referer leakage
     this.router.navigate([], { relativeTo: this.route, replaceUrl: true });
-    
+
     this.accountService.verifyEmail(token)
       .pipe(first())
       .subscribe({
