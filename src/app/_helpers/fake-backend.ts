@@ -1,23 +1,23 @@
 import { Injectable } from '@angular/core';
-import { HttpRequest, HttpResponse, HttpHandler, HttpEvent, HttpInterceptor, HTTP_INTERCEPTORS, HttpHeaders } from '@angular/common/http';
+import { HttpRequest, HttpResponse, HttpHandler, HttpEvent, HttpInterceptor, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { delay, materialize, dematerialize } from 'rxjs/operators';
 
 import { AlertService } from '../_services';
-import { Role } from '../_models';
+import { Account, Role } from '../_models';
 
 const accountsKey = 'angular-19-signup-verification-boilerplate-accounts';
 let accounts = JSON.parse(localStorage.getItem(accountsKey) ?? '[]');
 
 @Injectable()
 export class FakeBackendInterceptor implements HttpInterceptor {
-    constructor(private alertService: AlertService) { }
+    constructor(private readonly alertService: AlertService) { }
 
     intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         const { url, method, headers, body } = request;
         const alertService = this.alertService;
 
-        return handleRoute() || of(new HttpResponse({ status: 200 }));
+        return handleRoute() ?? of(new HttpResponse({ status: 200 }));
         
         function handleRoute(): Observable<HttpEvent<any>> {
             switch (true) {
@@ -39,13 +39,13 @@ export class FakeBackendInterceptor implements HttpInterceptor {
                     return resetPassword();
                 case url.endsWith('/accounts') && method === 'GET':
                     return getAccounts();
-                case url.match(/^\/accounts\/\d+$/) && method === 'GET':
+                case /^\/accounts\/\d+$/.exec(url) && method === 'GET':
                     return getAccountById();
                 case url.endsWith('/accounts') && method === 'POST':
                     return createAccount();
-                case url.match(/^\/accounts\/\d+$/) && method === 'PUT':
+                case /^\/accounts\/\d+$/.exec(url) && method === 'PUT':
                     return updateAccount();
-                case url.match(/^\/accounts\/\d+$/) && method === 'DELETE':
+                case /^\/accounts\/\d+$/.exec(url) && method === 'DELETE':
                     return deleteAccount();
                 default:
                     return next.handle(request);
@@ -286,32 +286,32 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             return ok();
         }
         
-        function ok(body?) {
+        function ok(body?: unknown) {
             return of(new HttpResponse({ status: 200, body }))
                 .pipe(delay(500)); // delay observable to simulate server API call
         }
         
-        function error(message) {
-            return throwError({ error: { message } })
+        function error(message: string) {
+            return throwError(() => ({ error: { message } }))
                 .pipe(materialize(), delay(500), dematerialize());
                 // call materialize and dematerialize to ensure delay even if an error is thrown (https://github.com/Reactive-Extensions/RxJS/issues/648)
         }
         
         function unauthorized() {
-            return throwError({ status: 401, error: { message: 'Unauthorized' } })
+            return throwError(() => ({ status: 401, error: { message: 'Unauthorized' } }))
                 .pipe(materialize(), delay(500), dematerialize());
         }
         
-        function basicDetails(account) {
-            const { id, title, firstName, lastName, email, role, dateCreated, isVerified } = account;
-            return { id, title, firstName, lastName, email, role, dateCreated, isVerified };
+        function basicDetails(account: Account) {
+            const { id, title, firstName, lastName, email, role, isVerified } = account;
+            return { id, title, firstName, lastName, email, role, isVerified };
         }
         
         function isAuthenticated() {
             return !!currentAccount();
         }
         
-        function isAuthorized(role) {
+        function isAuthorized(role: Role) {
             const account = currentAccount();
             if (!account) return false;
             return account.role === role;
@@ -323,10 +323,10 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         }
         
         function newAccountId() {
-            return accounts.length ? Math.max(...accounts.map(x => x.id)) + 1 : 1;
-          }
+        return accounts.length ? Math.max(...accounts.map(x => x.id)) + 1 : 1;
+        }
           
-          function currentAccount() {
+        function currentAccount() {
             // check if jwt token is in auth header
             const authHeader = headers.get('Authorization');
             if (!authHeader?.startsWith('Bearer fake-jwt-token')) return;
@@ -338,18 +338,18 @@ export class FakeBackendInterceptor implements HttpInterceptor {
           
             const account = accounts.find(x => x.id === jwtToken.id);
             return account;
-          }
+        }
           
-          function generateJwtToken(account) {
+        function generateJwtToken(account: Account) {
             // create token that expires in 15 minutes
             const tokenPayload = {
               exp: Math.round(new Date(Date.now() + 15*60*1000).getTime() / 1000),
               id: account.id
             };
             return `fake-jwt-token.${btoa(JSON.stringify(tokenPayload))}`;
-          }
+        }
           
-          function generateRefreshToken() {
+        function generateRefreshToken() {
             const token = new Date().getTime().toString();
           
             // add token cookie that expires in 7 days
@@ -357,11 +357,11 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             document.cookie = `fakeRefreshToken=${token}; expires=${expires}; path=/`;
           
             return token;
-          }
+        }
           
-          function getRefreshToken() {
+        function getRefreshToken() {
             // get refresh token from cookie
-            return (document.cookie.split(';').find(x => x.includes('fakeRefreshToken')) || '=').split('=')[1];
+            return (document.cookie.split(';').find(x => x.includes('fakeRefreshToken')) ?? '=').split('=')[1];
         }
     }
 }
