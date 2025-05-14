@@ -9,6 +9,10 @@ import { Account } from '../_models';
 
 const baseUrl = `${environment.apiUrl}/accounts`;
 
+interface RegisterParams extends Omit<Account, 'id'> {
+    password: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AccountService {
     private readonly accountSubject: BehaviorSubject<Account | null>;
@@ -52,8 +56,8 @@ export class AccountService {
             }));
     }
     
-    register(account: Account) {
-        return this.http.post(`${baseUrl}/register`, account);
+    register(params: RegisterParams) {
+        return this.http.post(`${baseUrl}/register`, params);
     }
     
     verifyEmail(token: string) {
