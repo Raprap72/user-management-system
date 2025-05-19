@@ -1,9 +1,9 @@
 {
   "database": {
     "host": "153.92.15.31",
-    "user": "u875409848_teopiz",
+    "user": "u875409848_alon",
     "password": "9T2Z5$3UKkgSYzE",
-    "database": "u875409848_teopiz"
+    "database": "u875409848_alon"
   },
   "secret": "terces",
   "emailFrom": "info@node-mysql-signup-verification-api.com",
@@ -12,8 +12,8 @@
     "port": 587,
     "secure": false,
     "auth": {
-      "user": "kristianbaronteopiz@gmail.com",
-      "pass": "jsdjfbjsdf"
+      "user": "wisrtalon@gmail.com",
+      "pass": "Theodore1"
     }
   }
 }
