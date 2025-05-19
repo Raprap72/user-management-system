@@ -5,7 +5,7 @@
     "password": "9T2Z5$3UKkgSYzE",
     "database": "u875409848_alon"
   },
-  "secret": "terces",
+  "secret": "Raprap",
   "emailFrom": "info@node-mysql-signup-verification-api.com",
   "smtpOptions": {
     "host": "smtp.ethereal.email",
