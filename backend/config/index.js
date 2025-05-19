@@ -8,7 +8,7 @@ module.exports = {
     password: "9T2Z5$3UKkgSYzE",
     database: "u875409848_teopiz",
   },
-  secret: "terces",
+  secret: "Raprap",
 };
 
 // Then, in other files, use it like:
