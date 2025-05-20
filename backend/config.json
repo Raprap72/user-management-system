@@ -2,19 +2,19 @@
   "database": {
     "host": "153.92.15.31",
     "port": 3306,
-    "user": "u875409848_alon",
+    "user": "u875409848_tuyor",
     "password": "9T2Z5$3UKkgSYzE",
-    "database": "u875409848_alon"
+    "database": "u875409848_tuyor"
   },
   "secret": "Raprap",
-  "emailFrom": "ralph.theodore.d.alon@yourdomain.com",
+  "emailFrom": "tuyor@yourdomain.com",
   "smtpOptions": {
     "host": "smtp.ethereal.email",
     "port": 587,
     "secure": false,
     "auth": {
-      "user": "wisrtalon@gmail.com",
-      "pass": "Theodore1"
+      "user": "tuyor@gmail.com",
+      "pass": "tuyor"
     }
   }
 }
